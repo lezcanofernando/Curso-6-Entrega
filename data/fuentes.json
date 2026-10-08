@@ -1,0 +1,30 @@
+[
+  {"tipo": "reseñas", "producto": "yerba", "fuente": "Google Maps", "texto": "La yerba de la marca propia es muy buena, rinde un montón y tiene buen sabor."},
+  {"tipo": "reseñas", "producto": "yerba", "fuente": "Instagram", "texto": "Excelente yerba, la compro siempre. Recomendable."},
+  {"tipo": "reseñas", "producto": "yerba", "fuente": "Google Maps", "texto": "Me pareció cara para lo que es, y el paquete vino roto."},
+  {"tipo": "reseñas", "producto": "yerba", "fuente": "Facebook", "texto": "Buena yerba pero últimamente siempre falta en la góndola."},
+  {"tipo": "reseñas", "producto": "yerba", "fuente": "Instagram", "texto": "Muy rica, suave y sin palo. Excelente relación precio calidad."},
+
+  {"tipo": "reseñas", "producto": "leche", "fuente": "Google Maps", "texto": "La leche llegó vencida, malísima experiencia."},
+  {"tipo": "reseñas", "producto": "leche", "fuente": "Facebook", "texto": "Leche fresca y buena, siempre hay stock."},
+  {"tipo": "reseñas", "producto": "leche", "fuente": "Instagram", "texto": "Cara comparada con otros supermercados."},
+
+  {"tipo": "reseñas", "producto": "aceite", "fuente": "Google Maps", "texto": "Buen aceite, excelente precio en la promo."},
+  {"tipo": "reseñas", "producto": "aceite", "fuente": "Facebook", "texto": "Nunca hay aceite, siempre falta. Malo el servicio."},
+
+  {"tipo": "precios", "producto": "yerba", "fuente": "Supermercados del Valle", "texto": "Yerba 1 kg: $4200"},
+  {"tipo": "precios", "producto": "yerba", "fuente": "Competidor: SuperAhorro", "texto": "Yerba 1 kg: $3900"},
+  {"tipo": "precios", "producto": "yerba", "fuente": "Competidor: MaxiCompra", "texto": "Yerba 1 kg: $4500"},
+  {"tipo": "precios", "producto": "yerba", "fuente": "Competidor: El Barrio", "texto": "Yerba 1 kg: $4000"},
+
+  {"tipo": "precios", "producto": "leche", "fuente": "Supermercados del Valle", "texto": "Leche 1 litro: $1350"},
+  {"tipo": "precios", "producto": "leche", "fuente": "Competidor: SuperAhorro", "texto": "Leche 1 litro: $1200"},
+  {"tipo": "precios", "producto": "leche", "fuente": "Competidor: MaxiCompra", "texto": "Leche 1 litro: $1280"},
+
+  {"tipo": "precios", "producto": "aceite", "fuente": "Supermercados del Valle", "texto": "Aceite girasol 1,5 L: $3100"},
+  {"tipo": "precios", "producto": "aceite", "fuente": "Competidor: SuperAhorro", "texto": "Aceite girasol 1,5 L: $3300"},
+  {"tipo": "precios", "producto": "aceite", "fuente": "Competidor: El Barrio", "texto": "Aceite girasol 1,5 L: $3250"},
+
+  {"tipo": "noticias", "producto": "yerba", "fuente": "Diario del Litoral", "texto": "Se espera un aumento del 8% en el precio mayorista de la yerba para noviembre por la sequía en Misiones."},
+  {"tipo": "noticias", "producto": "leche", "fuente": "Agro Hoy", "texto": "La producción de leche creció 3% interanual y los precios se mantienen estables."}
+]
