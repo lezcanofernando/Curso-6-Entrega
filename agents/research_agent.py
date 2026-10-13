@@ -12,10 +12,26 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 
-from config import get_llm
+from config import get_llm, medir_tiempo
 from state import OrquestadorState
 
-FUENTES = json.loads((Path(__file__).parent.parent / "data" / "fuentes.json").read_text(encoding="utf-8"))
+RUTA_FUENTES = Path(__file__).parent.parent / "data" / "fuentes.json"
+
+
+def cargar_fuentes(ruta: Path = RUTA_FUENTES) -> list[dict]:
+    """Lee las fuentes simuladas. Si el archivo falta, está roto o vacío, corta con un mensaje claro."""
+    try:
+        fuentes = json.loads(ruta.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise RuntimeError(f"No se encontró el archivo de fuentes: {ruta}") from None
+    except (json.JSONDecodeError, UnicodeDecodeError) as error:
+        raise RuntimeError(f"El archivo de fuentes {ruta} no es un JSON válido: {error}") from None
+    if not fuentes:
+        raise RuntimeError(f"El archivo de fuentes {ruta} está vacío: no hay nada para buscar.")
+    return fuentes
+
+
+FUENTES = cargar_fuentes()
 
 
 @tool
@@ -50,6 +66,7 @@ Tu único trabajo es BUSCAR datos con la herramienta `buscar_en_fuentes`.
 agente = create_react_agent(get_llm(), tools=[buscar_en_fuentes], prompt=PROMPT)
 
 
+@medir_tiempo("investigador")
 def nodo_investigador(state: OrquestadorState) -> dict:
     """Nodo del grafo. El agente solo recibe la instrucción del supervisor,
     no todo el historial (así evitamos la "contaminación de contexto")."""

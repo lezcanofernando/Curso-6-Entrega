@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 
-from config import get_llm
+from config import get_llm, medir_tiempo
 from state import OrquestadorState
 
 # Análisis de sentimiento simple por palabras clave (fácil de entender y de verificar).
@@ -65,6 +65,7 @@ Respondé con los resultados numéricos y una conclusión breve."""
 agente = create_react_agent(get_llm(), tools=[analizar_sentimiento, comparar_precios], prompt=PROMPT)
 
 
+@medir_tiempo("analista")
 def nodo_analista(state: OrquestadorState) -> dict:
     """Nodo del grafo. Recibe la instrucción del supervisor + SOLO los datos del
     investigador (no los mensajes del supervisor ni el resto del historial)."""

@@ -5,7 +5,8 @@ from typing import Literal
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from config import MAX_PASOS, get_llm
+import config
+from config import get_llm, medir_tiempo
 from state import OrquestadorState, formatear_aportes
 
 
@@ -53,22 +54,23 @@ llm = get_llm()
 llm_supervisor = llm.with_structured_output(Decision, method="json_schema")
 
 
+@medir_tiempo("supervisor")
 def nodo_supervisor(state: OrquestadorState) -> dict:
     pasos = state.get("pasos", 0)
 
     # Condición de parada dura: si se llegó al límite, se termina sí o sí.
-    if pasos >= MAX_PASOS:
+    if pasos >= config.MAX_PASOS:
         return {
             "next_agent": "FINISH",
             "task_completed": True,
-            "messages": [AIMessage(f"Límite de {MAX_PASOS} pasos alcanzado: finalizo.", name="supervisor")],
+            "messages": [AIMessage(f"Límite de {config.MAX_PASOS} pasos alcanzado: finalizo.", name="supervisor")],
         }
 
     pedido = state["messages"][0].text
     contexto = (
         f"Pedido del usuario:\n{pedido}\n\n"
         f"Aportes de los especialistas hasta ahora:\n{formatear_aportes(state.get('aportes', []))}\n\n"
-        f"Paso {pasos + 1} de {MAX_PASOS}."
+        f"Paso {pasos + 1} de {config.MAX_PASOS}."
     )
     decision: Decision = llm_supervisor.invoke([SystemMessage(SUPERVISOR_PROMPT), HumanMessage(contexto)])
 
@@ -88,6 +90,7 @@ def elegir_siguiente(state: OrquestadorState) -> Literal["investigador", "analis
     return state["next_agent"]
 
 
+@medir_tiempo("sintetizador")
 def nodo_sintetizador(state: OrquestadorState) -> dict:
     pedido = state["messages"][0].text
     contexto = f"Pedido del usuario:\n{pedido}\n\nAportes:\n{formatear_aportes(state['aportes'])}"

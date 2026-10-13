@@ -45,18 +45,51 @@ Las flechas punteadas son **aristas condicionales**: el Supervisor elige a dónd
 | [graph.py](graph.py) | Arma el `StateGraph` y lo compila. |
 | [main.py](main.py) | Demo por consola que imprime cada paso. |
 | [demo.ipynb](demo.ipynb) | Notebook que demuestra el flujo de delegación, ya ejecutado y con las salidas guardadas. |
-| [config.py](config.py) | Modelo de lenguaje y límite de pasos. |
+| [config.py](config.py) | Modelo de lenguaje, límite de pasos, validación del `.env` y logs con tiempos. |
+| [tests/](tests/) | Tests automatizados con pytest. |
 
 ## Cómo correrlo
 
-```bash
+### 1. Instalar
+
+**Windows (PowerShell):**
+
+```powershell
 python -m venv .venv
-.venv\Scripts\activate          # Windows
+.venv\Scripts\activate
 pip install -r requirements.txt
-copy .env.example .env          # y completar ANTHROPIC_API_KEY
+copy .env.example .env
+```
+
+**Linux / macOS:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+### 2. Configurar la API key
+
+Abrí el archivo `.env` y completá `ANTHROPIC_API_KEY`. Si falta, el programa corta al inicio con un mensaje claro que indica qué variable falta.
+
+### 3. Ejecutar
+
+Los comandos son los mismos en todos los sistemas, con el entorno virtual activado:
+
+```bash
 python main.py
 python main.py "¿Cómo está el precio de la leche frente a la competencia?"
+pytest
 ```
+
+### Notas sobre el modelo
+
+- Todos los agentes usan el mismo LLM, que se crea en `get_llm()` de [config.py](config.py), así que la configuración es igual en todos lados.
+- No se pasa `temperature` porque `claude-sonnet-5-5` no acepta valores distintos al default: la API devuelve error.
+- La salida estructurada del supervisor usa `method="json_schema"`, que es el método que soporta este modelo.
+- `create_react_agent` muestra un aviso de deprecación (en LangGraph 1.x se movió a `langchain.agents.create_agent`). Se mantiene porque es la función que pide la consigna, y funciona igual.
 
 ## Estado compartido
 
@@ -85,6 +118,28 @@ En `aportes` cada especialista **agrega** un registro `{agente, instruccion, res
 4. **Corte contra el "supervisor infinito".** Hay un contador `pasos` con límite `MAX_PASOS = 6`. Si se alcanza, el flujo termina sí o sí. El prompt también le pide aceptar los datos "no disponibles" en vez de insistir.
 5. **Sin contaminación de contexto.** Los especialistas no reciben todo el historial. El Investigador recibe solo la instrucción del Supervisor, y el Analista recibe la instrucción más los resultados del Investigador.
 
+## Logs
+
+Cada nodo registra en el log cuánto tardó y, en el caso del supervisor, qué decidió. Lo hace el decorador `medir_tiempo` de [config.py](config.py):
+
+```
+09:14:59 [INFO] nodo supervisor -> investigador (3.63 s)
+09:15:05 [INFO] nodo investigador (6.04 s)
+09:15:10 [INFO] nodo supervisor -> analista (5.02 s)
+09:15:26 [INFO] nodo analista (15.40 s)
+09:15:30 [INFO] nodo supervisor -> FINISH (3.77 s)
+09:15:35 [INFO] nodo sintetizador (5.71 s)
+```
+
+## Tests
+
+`pytest` corre 13 tests que **no llaman a la API**, así que son gratis y rápidos. Cubren:
+
+- **Herramientas:** la búsqueda en fuentes (incluido un producto inexistente), el análisis de sentimiento y la comparación de precios, con valores esperados exactos.
+- **Carga de `data/`:** si el archivo falta, no es un JSON válido o está vacío, falla con un mensaje claro.
+- **Supervisor:** el ruteo de `elegir_siguiente` a cada nodo, y que al llegar a `MAX_PASOS` corte con FINISH sin llamar al LLM.
+- **Entorno:** que falle con un mensaje claro si falta `ANTHROPIC_API_KEY`.
+
 ## Ejemplo de ejecución
 
 Pregunta: *"¿Qué opinan los clientes de nuestra yerba y estamos caros o baratos frente a la competencia?"*
@@ -98,4 +153,10 @@ SUPERVISOR   -> FINISH: se cumple la rúbrica
 SINTETIZADOR    respuesta final con una recomendación
 ```
 
-La salida completa está en [demo.ipynb](demo.ipynb).
+## Demo en el notebook
+
+[demo.ipynb](demo.ipynb) está ejecutado y tiene las salidas guardadas. Muestra tres casos:
+
+1. **Flujo normal:** el ejemplo de arriba.
+2. **Refinamiento:** el grafo arranca con un aporte del Analista que tiene errores a propósito ("100 % de reseñas positivas"). El Supervisor lo detecta con su rúbrica ("la reseña 3 es negativa, así que no puede ser 100 % positivo"), le pide al Analista que corrija, y recién después da FINISH.
+3. **Corte por límite de pasos:** con `MAX_PASOS = 1`, el Supervisor corta después del primer especialista y pasa al Sintetizador, aunque falte el análisis.
