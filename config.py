@@ -41,8 +41,6 @@ if not logger.handlers:  # evita handlers duplicados si el módulo se recarga (e
 
 def get_llm() -> ChatAnthropic:
     # Todos los agentes usan este mismo LLM, así la configuración es igual en todos lados.
-    # No pasamos `temperature` porque claude-sonnet-5-5 no acepta valores distintos al
-    # default (la API devuelve error). Se usa el default del modelo en todos los agentes.
     return ChatAnthropic(model=MODEL)
 
 

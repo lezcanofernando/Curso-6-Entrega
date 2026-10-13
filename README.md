@@ -87,7 +87,6 @@ pytest
 ### Notas sobre el modelo
 
 - Todos los agentes usan el mismo LLM, que se crea en `get_llm()` de [config.py](config.py), así que la configuración es igual en todos lados.
-- No se pasa `temperature` porque `claude-sonnet-5-5` no acepta valores distintos al default: la API devuelve error.
 - La salida estructurada del supervisor usa `method="json_schema"`, que es el método que soporta este modelo.
 - `create_react_agent` muestra un aviso de deprecación (en LangGraph 1.x se movió a `langchain.agents.create_agent`). Se mantiene porque es la función que pide la consigna, y funciona igual.
 
